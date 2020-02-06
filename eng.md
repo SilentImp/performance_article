@@ -3,12 +3,11 @@
 # How to make performance visible with GitLab CI and hoodoo of GitLab artifacts.
 
 
-
 We may optimize application so well that it will start immediately and 60 would be the lowest fps value. But in a month, half a year, ten features, lunar eclipse, or seven tuna sandwiches later, nothing will be remembered about the performance you were fighting for. Just accept this fact as a sad reality.
 
-So what we should do? Just come to terms with this and quit caring about performance? It's not a solution. Performance is a competitive advantage that can bring and retain customers. Should you optimize your application from time to time? It's costly. And complex. And that's means that despite all benefits of the performance from a business perspective it's hardly profitable.
+So what should we do? Just come to terms with this and quit caring about performance? It's not a solution. Performance is a competitive advantage that can bring and retain customers. Should you optimize your application from time to time? It's costly. And complex. And that's means that despite all benefits of the performance from a business perspective it's hardly profitable.
 
-The first step in comping to the solution of any problem — make the problem visible. And I want to discuss exactly that.
+The first step in coming up with a solution for any problem — make the problem visible. And we want to discuss exactly that.
 
 ## How to create a performance budget for a project
 
@@ -18,7 +17,7 @@ The easiest way to define desired values for metrics: use your competitors or ev
 
 ### Use competitors for your benefit
 
-If you ever happened to run away from an ecstatically overexcited bear, then you already know, that you don't need to be an  Olympic champion in running to get out of this trouble. You just need to be a little bit faster than the other guy.
+If you ever happened to run away from an ecstatically overexcited bear, then you already know, that you don't need to be an Olympic champion in running to get out of this trouble. You just need to be a little bit faster than the other guy.
 So make a competitors list. If these are projects of the same type, then they usually consist of page types similar to each other. For example, for an internet shop, it may be a page with a product list, product details page, shopping cart, checkout, etc.
 
 1. Measure the values of your selected metrics on each type of page for your competitor's projects.
@@ -35,15 +34,15 @@ Do you have a unique project? Don't have any competitors? You already are better
 
 There are two ways of measuring performance: synthetic, in a controlled environment and RUM (real user measurements) where data is being collected from real users in production.
 
-We will use synthetic tests and assume that our project uses GitLab with its build-in CI for project deployment.
+In this article, we will use synthetic tests and assume that our project uses GitLab with its built-in CI for project deployment.
 
 ### Library and its size as a metric
 
-Let's assume you decided to develop a library and publish it to the NPM. You want to keep it light, much lighter than competitors, so it has less influence on result project end size. And thus save clients traffic, sometimes traffic he paying for. Also, allowing a project to be loaded faster, which is pretty important in light of growing mobile share and new markets with slow connection speed and fragmented internet coverage. 
+Let's assume you decided to develop a library and publish it to the NPM. You want to keep it light, much lighter than competitors, so it has less influence on result project end size. And thus saving clients traffic, sometimes traffic they are paying for. Also, allowing a project to be loaded faster, which is pretty important in light of growing mobile share and new markets with slow connection speed and fragmented internet coverage. 
 
 ### Package for measuring library size
 
-To keep size of the library as small as possible we need to watch how it changes. But how to do it? We may use package [Size Limit](https://github.com/ai/size-limit/) created by [Andrey Sitnik](https://sitnik.ru/) from [Evil Martians](https://evilmartians.com/).
+To keep the size of your library as small as possible we need to watch how it changes. But how to do it? We may use package [Size Limit](https://github.com/ai/size-limit/) created by [Andrey Sitnik](https://sitnik.ru/) from [Evil Martians](https://evilmartians.com/).
 
 Let's install it:
 
@@ -65,9 +64,9 @@ And add to `package.json`
 + ],
 ```
 
- `"size-limit":[{},{},…]`block contains a list of the files size of which we are willing to check. In our case it's just a one single file — `index.js`
+The `"size-limit":[{},{},…]`block contains a list of the files of which we want to keep track of the size. In our case, it's just one single file — `index.js`
 
-NPM script `size` just run `size-limit` package, which read configuration block `size-limit` that we have mentioned before and check a size of the files, listed there. Let's run it and see what will happen:
+The NPM script `size` will then run the `size-limit` package, which reads the `size-limit` configuration block that we have mentioned before and checks the size of the files listed there. Let's run it and see what happens:
 
 ```bash
 npm run size
@@ -75,7 +74,7 @@ npm run size
 
 ![Result of command execution shows the size of index.js.](images/size-limit-1.png)
 
-Now we seeing the size of the file but this size is not actually under control. Let's fix that, add `limit` to `package.json`:
+Now we can see the size of the file but it’s not actually under control yet. Let's fix that by adding a `limit` in `package.json`:
 
 ```diff
 "size-limit": [
@@ -90,24 +89,24 @@ And now, if we will run the script it will be validated against the limit we set
 
 ![Screenshot of the terminal, the size of the file is less than the limit and being shown as green.](images/size-limit-2.png)
 
-In case if the file size exceeds limit than the script will be finished with non-zero code. This, aside from other things, means that it will stop the pipeline in the GitLab CI. And we can use it.
+In case the file size exceeds the limit we defined, the script will be finished with a non-zero code. This, aside from other things, means that it will stop the pipeline in the GitLab CI, and we can leverage on that.
 
-![Screenshot of the terminal, the size of the file exceeds the limit and being shown as red. Script was finished with non-zero code.](images/size-limit-3.png)
+![Screenshot of the terminal where the size of the file exceeds the limit and being shown as red. The script was finished with non-zero code.](images/size-limit-3.png)
 
-Now we can use hooks to check the file size against the limit before every commit … but there always will be `git the hook rebase -i HEAD~1`, which wouldn't run `pre-commit` hook, or, for example `--no-verify` key. And all attempts to prevent an increase in size will be lost in vain.
+Now we can use hooks to check the file size against the limit before every commit… but there will always be ways to bypass our `pre-commit` hook, for example by using the `--no-verify` key, or when we do commands like `git the hook rebase -i HEAD~1`. And with that, all attempts to prevent an increase in size will be lost in vain.
 
-Also, we shouldn't need to make this check blocking. Why? Because it's ok that the size of the library growing while you are adding new features. We need to make changes visible, that's all. This will help to avoid accidental size increase because of the library that we don't need. And, perhaps, give developers and product owner reason to think if this feature worse it? Or, maybe, if there are smaller packages? https://bundlephobia.com/ allows as to find an alternative to almost anything. 
+Also, we shouldn't need to make this check blocking. Why? Because it's ok that the size of the library grows as you add new features. We need to make changes visible, that's all. This will help to avoid accidental size increase because of a library that we don't need. And, perhaps, give developers and product owner a reason to consider if that new feature is really worth it? Or, maybe, we can check if there are smaller packages? https://bundlephobia.com/ allows us to find an alternative to almost anything. 
 
-So what we should do? Let's show the change in the file size directly in the merge request! You don't push to the master directly, you act like a grown-up developer, are you?
+So what should we do? Let's show the change in the file size directly in the merge request! You don't push to the master branch directly, you act like a grown-up developer, right?
 
-#### How to run check inside the GitLab CI
+#### Running our check on GitLab CI
 
-Let's add [GitLab artifact](https://docs.gitlab.com/ee/ci/yaml/README.html#artifacts) of the [metrics](https://docs.gitlab.com/ee/ci/yaml/README.html#artifactsreportsmetrics-premium) type. An artifact is a file, which will «live» after the pipeline operation is finished. This specific type of artifact allows us to show the additional widget in the merge request, this widget will show how to change the value of the metric between artifact in the master and in the feature branch. Format of the `metrics` artifact is a [text Prometheus format](https://prometheus.io/docs/instrumenting/exposition_formats/). For GitLab values inside of the artifact, it's just a text. GitLab doesn't understand how exactly has changed the value, it just knows that value is different. So, what exactly we should do?
+Let's add a [GitLab artifact](https://docs.gitlab.com/ee/ci/yaml/README.html#artifacts) of the [metrics](https://docs.gitlab.com/ee/ci/yaml/README.html#artifactsreportsmetrics-premium) type. An artifact is a file, which will «live» after the pipeline operation is finished. This specific type of artifact allows us to show an additional widget in the merge request containing the changes in the value of of the metric between the artifact in master and in the feature branch. The format of the `metrics` artifact is a [Prometheus text format](https://prometheus.io/docs/instrumenting/exposition_formats/). For GitLab values inside of the artifact, it's just a text. GitLab doesn't understand how exactly the value has changed, it just knows that the value is different. So, what exactly should we do?
 
 1. Define artifacts in the pipeline.
-2. Change script in a way it will create an artifact in the pipeline.
+2. Change the script so that it creates an artifact on the pipeline.
 
-To create an artifact we need to change `.gitlab-ci.yml` next way:
+To create an artifact we need to change `.gitlab-ci.yml` this way:
 
 ```diff
 image: node:latest
@@ -128,7 +127,7 @@ sizecheck:
 +    reports:
 +      metrics: metric.txt
 ```
-1. `expire_in: 7 days` — artifact will exist for 7 days.
+1. `expire_in: 7 days` — artifact will exist for 7 days.
 
 2. ```yaml
    paths:
@@ -141,7 +140,7 @@ sizecheck:
      metrics: metric.txt
    ```
 
-   The artifact will have type `reports:metrics`
+   The artifact will have the type `reports:metrics`
 
 Now let's make Size Limit to generate a report. To do so we need to change `package.json`:
 
@@ -153,13 +152,13 @@ Now let's make Size Limit to generate a report. To do so we need to change `pack
 },
 ```
 
-`size-limit` with key `--JSON` will output data in json format:
+`size-limit` with key `--json` will output data in json format:
 
-![Command size-limit --json output JSON to console. JSON contains an array of objects which contains a file name, size and if it exciding size limit.](images/size-limit-json.png)
+![Command size-limit --json output JSON to console. JSON contains an array of objects which contains a file name, size and if it exceeds the size limit.](images/size-limit-json.png)
 
 And redirection `> size-limit.json` will save JSON into file `size-limit.json`.
 
-Now we need to create artifact out of this. Format boils down to `[metrics name][space][metrics value]`. Let's create the script `generate-metric.js`:
+Now we need to create an artifact out of this. Format boils down to `[metrics name][space][metrics value]`. Let's create the script `generate-metric.js`:
 
 ```javascript
 const report = require('./size-limit.json');
@@ -177,7 +176,7 @@ And add it to `package.json`:
 },
 ```
 
-Because we have used prefix `post` command `npm run size` will run `size` script first, and then, automatically, execute `postsize` script, which will result in the creation of the `metric.txt` file, our artifact. 
+Because we have used the `post` prefix, the `npm run size` command will run the `size` script first, and then, automatically, execute the `postsize` script, which will result in the creation of the `metric.txt` file, our artifact. 
 
 As a result, when we will merge this branch to master, change something and create a new merge request, we will see:
 
@@ -189,27 +188,27 @@ Now we actually see how to change the size of the package and can make a reasona
 
 #### Resume
 
-Ok! We figure out how to handle the trivial case. If you have multiple files, just separate metrics with line breaks. As an alternative for Size Limit, you may consider [bundlesize](https://www.npmjs.com/package/bundlesize). If you are using WebPack, you may get all sizes you need by building with `--profile` and `--json` flags:
+Ok! We figure out how to handle the trivial case. If you have multiple files, just separate metrics with line breaks. As an alternative for Size Limit, you may consider [bundlesize](https://www.npmjs.com/package/bundlesize). If you are using WebPack, you may get all sizes you need by building with the `--profile` and `--json` flags:
 
 ```bash
 webpack --profile --json > stats.json
 ```
 
-If you are using next.js, you can, for example, use plugin [@next/bundle-analyzer](https://www.npmjs.com/package/@next/bundle-analyzer).
+If you are using next.js, you can, for example, use the [@next/bundle-analyzer](https://www.npmjs.com/package/@next/bundle-analyzer) plugin.
 
 ### Using lighthouse
 
-Lighthouse is a standard de'facto in project analytics. Let's write a script, which will allow us to measure performance, a11y, best practice, and an SEO score.
+Lighthouse is the de facto standard in project analytics. Let's write a script that allows us to measure performance, a11y, best practices, and an SEO score.
 
 #### Script to measure all the stuff
 
-To start with we will need to install [lighthouse](https://www.npmjs.com/package/lighthouse) package, which will make measurements, and [puppeteer](https://www.npmjs.com/package/puppeteer), which we will use as a headless-browser.
+To start we need to install the [lighthouse](https://www.npmjs.com/package/lighthouse) package, which will make measurements, and [puppeteer](https://www.npmjs.com/package/puppeteer), which we will use as a headless-browser.
 
 ```bash
 npm i -D lighthouse puppeteer
 ```
 
-Afterward, we should create `lighthouse.js` script and start a browser:
+Afterwards, we should create `lighthouse.js` script and start a browser:
 
 ```javascript
 const puppeteer = require('puppeteer');
@@ -221,7 +220,7 @@ const puppeteer = require('puppeteer');
 })();
 ```
 
-Now let us write a function that will help us to analyze the specific url:
+Now let’s write a function that will help us analyze a given url:
 
 ```javascript
 const lighthouse = require('lighthouse');
@@ -262,7 +261,7 @@ l/README.html#artifactsreportsperformance-premium).
 
 #### GitLab performance artifact
 
-This artifacts format … oh, to understand it I have to read code of the [sitespeed.io](https://gitlab.com/gitlab-org/gl-performance) plugin. Why GitLab can't describe the format of their artifacts inside their documentation? Mistery. 
+This artifacts format… well, to understand it we have to read the code of the [sitespeed.io](https://gitlab.com/gitlab-org/gl-performance) plugin. Why can't GitLab describe the format of their artifacts inside their own documentation? Mistery. 
 
 ```json
 [
@@ -318,9 +317,9 @@ A measurement is an object, that contains attributes:
 }
 ```
 
-Let's modify our `buildReport` function in a way it returns a report for one page with standard lighthouse metrics.
+Let's modify our `buildReport` function in a way that it returns a report for one page with standard lighthouse metrics.
 
-![Screenshot with lighthouse report. There are performance score, a11y score, best practice score, SEO score.](images/lighthouse-metrics.png)
+![Screenshot with lighthouse report. There are performance score, a11y score, best practices score, SEO score.](images/lighthouse-metrics.png)
 
 ```javascript
 const buildReport = browser => async url => {
