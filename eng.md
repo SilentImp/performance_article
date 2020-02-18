@@ -28,7 +28,7 @@ Why 20%? This is a magic number, which, supposedly, should mean that the differe
 
 ### A fight with a shadow
 
-Do you have a unique project? Don't have any competitors? You already are better than any of them in all possible senses? It's not an issue. You can always compete with the only worthy opponent — yourself. Measure each performance metric of your project on each type of page and then make them better by the same 20%.
+Do you have a unique project? Don't have any competitors? Or you are already better than any of them in all possible senses? It's not an issue. You can always compete with the only worthy opponent — yourself. Measure each performance metric of your project on each type of page and then make them better by the same 20%.
 
 ## Synthetic tests
 
@@ -38,11 +38,11 @@ In this article, we will use synthetic tests and assume that our project uses Gi
 
 ### Library and its size as a metric
 
-Let's assume you decided to develop a library and publish it to the NPM. You want to keep it light, much lighter than competitors, so it has less influence on result project end size. And thus saving clients traffic, sometimes traffic they are paying for. Also, allowing a project to be loaded faster, which is pretty important in light of growing mobile share and new markets with slow connection speed and fragmented internet coverage. 
+Let's assume that you've decided to develop a library and publish it to NPM. You want to keep it light, much lighter than competitors, so it has less impact on the resulting project's end size. This saves clients traffic, sometimes traffic the client is paying for. It also allows the project to be loaded faster, which is pretty important in regards of the growing mobile share and new markets with slow connection speeds and fragmented internet coverage. 
 
 ### Package for measuring library size
 
-To keep the size of your library as small as possible we need to watch how it changes. But how to do it? We may use package [Size Limit](https://github.com/ai/size-limit/) created by [Andrey Sitnik](https://sitnik.ru/) from [Evil Martians](https://evilmartians.com/).
+To keep size of the library as small as possible we need to carefully watch how it changes over development time. But how can you do it? We may use package [Size Limit](https://github.com/ai/size-limit/) created by [Andrey Sitnik](https://sitnik.ru/) from [Evil Martians](https://evilmartians.com/).
 
 Let's install it:
 
@@ -64,9 +64,9 @@ And add to `package.json`
 + ],
 ```
 
-The `"size-limit":[{},{},…]`block contains a list of the files of which we want to keep track of the size. In our case, it's just one single file — `index.js`
+The `"size-limit":[{},{},…]`block contains a list of the files size of which we want to check. In our case it's just one single file — `index.js`
 
-The NPM script `size` will then run the `size-limit` package, which reads the `size-limit` configuration block that we have mentioned before and checks the size of the files listed there. Let's run it and see what happens:
+NPM script `size` just runs `size-limit` package, which reads the configuration block `size-limit` mentioned before and checks the size of the files listed there. Let's run it and see what happens:
 
 ```bash
 npm run size
@@ -74,7 +74,7 @@ npm run size
 
 ![Result of command execution shows the size of index.js.](images/size-limit-1.png)
 
-Now we can see the size of the file but it’s not actually under control yet. Let's fix that by adding a `limit` in `package.json`:
+Now we can see the size of the file, but this size is not actually under control. Let's fix that by adding `limit` to `package.json`:
 
 ```diff
 "size-limit": [
@@ -85,23 +85,23 @@ Now we can see the size of the file but it’s not actually under control yet. L
 ],
 ```
 
-And now, if we will run the script it will be validated against the limit we set.
+Now if we run the script it will be validated against the limit we set.
 
-![Screenshot of the terminal, the size of the file is less than the limit and being shown as green.](images/size-limit-2.png)
+![Screenshot of the terminal, the size of the file is less than the limit and is shown as green.](images/size-limit-2.png)
 
-In case the file size exceeds the limit we defined, the script will be finished with a non-zero code. This, aside from other things, means that it will stop the pipeline in the GitLab CI, and we can leverage on that.
+In the case that new development changes the file size to the point of exceeding the defined limit, the script will complete with non-zero code. This, aside from other things, means that it will stop the pipeline in the GitLab CI.
 
 ![Screenshot of the terminal where the size of the file exceeds the limit and being shown as red. The script was finished with non-zero code.](images/size-limit-3.png)
 
-Now we can use hooks to check the file size against the limit before every commit… but there will always be ways to bypass our `pre-commit` hook, for example by using the `--no-verify` key, or when we do commands like `git the hook rebase -i HEAD~1`. And with that, all attempts to prevent an increase in size will be lost in vain.
+Now we can use hooks to check the file size against the limit before every commit … but there are always with something like `git the hook rebase -i HEAD~1` which wouldn't run `pre-commit` hook, or, for example `--no-verify` key. Then all attempts to prevent an increase in size would be lost in vain.
 
-Also, we shouldn't need to make this check blocking. Why? Because it's ok that the size of the library grows as you add new features. We need to make changes visible, that's all. This will help to avoid accidental size increase because of a library that we don't need. And, perhaps, give developers and product owner a reason to consider if that new feature is really worth it? Or, maybe, we can check if there are smaller packages? https://bundlephobia.com/ allows us to find an alternative to almost anything. 
+It's important to note that we shouldn't need to make this check blocking. Why? Because it's okay that the size of the library grows while you are adding new features. We need to make the changes visible, that's all. This will help to avoid an accidental size increase because of the introducing a helper library that we don't need. And, perhaps, give developers and product owners reason to think if the feature being added is worth the size increase? Or, maybe, if there are smaller alternative packages? https://bundlephobia.com/ allows us to find an alternative for almost NPM package. 
 
-So what should we do? Let's show the change in the file size directly in the merge request! You don't push to the master branch directly, you act like a grown-up developer, right?
+So what we should do? Let's show the change in the file size directly in the merge request! You don't push to master directly, you act like a grown-up developer, right?
 
 #### Running our check on GitLab CI
 
-Let's add a [GitLab artifact](https://docs.gitlab.com/ee/ci/yaml/README.html#artifacts) of the [metrics](https://docs.gitlab.com/ee/ci/yaml/README.html#artifactsreportsmetrics-premium) type. An artifact is a file, which will «live» after the pipeline operation is finished. This specific type of artifact allows us to show an additional widget in the merge request containing the changes in the value of of the metric between the artifact in master and in the feature branch. The format of the `metrics` artifact is a [Prometheus text format](https://prometheus.io/docs/instrumenting/exposition_formats/). For GitLab values inside of the artifact, it's just a text. GitLab doesn't understand how exactly the value has changed, it just knows that the value is different. So, what exactly should we do?
+Let's add a [GitLab artifact](https://docs.gitlab.com/ee/ci/yaml/README.html#artifacts) of the [metrics](https://docs.gitlab.com/ee/ci/yaml/README.html#artifactsreportsmetrics-premium) type. An artifact is a file, which will «live» after the pipeline operation is finished. This specific type of artifact allows us to show an additional widget in the merge request, showing any change in the value of the metric between artifact in the master and in the feature branch. The format of the `metrics` artifact is a [text Prometheus format](https://prometheus.io/docs/instrumenting/exposition_formats/). For GitLab values inside the artifact, it's just text. GitLab doesn't understand what exactly has changed the value, it just knows that value is different. So, what exactly we should do?
 
 1. Define artifacts in the pipeline.
 2. Change the script so that it creates an artifact on the pipeline.
@@ -133,7 +133,7 @@ sizecheck:
    paths:
      - metric.txt
    ```
-   It will be saved in the root catalog. If you will skip this option then it wouldn't be possible to download it.
+   It will be saved in the root catalog. If you skip this option then it wouldn't be possible to download it.
 
 3. ```yaml
    reports:
@@ -142,7 +142,7 @@ sizecheck:
 
    The artifact will have the type `reports:metrics`
 
-Now let's make Size Limit to generate a report. To do so we need to change `package.json`:
+Now let's make Size Limit generate a report. To do so we need to change `package.json`:
 
 ```diff
 "scripts": {
